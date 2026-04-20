@@ -38,15 +38,8 @@ export class AuthController {
     private readonly customLogger: CustomLoggerService,
   ) {}
 
-  // Strict rate limit for registration: 5 requests per 15 minutes
-  @Throttle({ default: THROTTLER_CONFIG.AUTH })
-  @Post()
-  async create(@Body() payload: CreateAuthDto, @Req() req: Request) {
-    this.customLogger.log(
-      `Registration attempt for email: ${payload.email}`,
-      'AuthController',
-    );
-    const meta = {
+  private extractRequestMeta(req: Request) {
+    return {
       ip: req.ip || 'unknown',
       userAgent: req.headers['user-agent'] || 'unknown',
       device:
@@ -60,13 +53,37 @@ export class AuthController {
           ? req.headers['sec-ch-ua-platform'][0]
           : req.headers['sec-ch-ua-platform']),
     };
-    const result = await this.authService.create(payload, meta);
+  }
+
+  // Strict rate limit for registration: 5 requests per 15 minutes
+  @Throttle({ default: THROTTLER_CONFIG.AUTH })
+  @Post()
+  async create(@Body() payload: CreateAuthDto, @Req() req: Request) {
+    this.customLogger.log(
+      `Registration attempt for email: ${payload.email}`,
+      'AuthController',
+    );
+    const result = await this.authService.create(
+      payload,
+      this.extractRequestMeta(req),
+    );
 
     return {
       success: true,
       message: 'Registration and login successful',
       data: result,
     };
+  }
+
+  @Throttle({ default: THROTTLER_CONFIG.AUTH })
+  @Post('register')
+  async register(@Body() payload: CreateAuthDto, @Req() req: Request) {
+    this.customLogger.log(
+      `Registration attempt for email: ${payload.email}`,
+      'AuthController',
+    );
+
+    return this.authService.create(payload, this.extractRequestMeta(req));
   }
 
   // ==========================================

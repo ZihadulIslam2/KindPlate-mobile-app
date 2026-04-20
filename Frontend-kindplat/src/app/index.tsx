@@ -6,6 +6,7 @@ import {
   Text,
   View,
 } from 'react-native'
+import { useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 const features = [
@@ -20,6 +21,8 @@ const features = [
 ]
 
 export default function Index() {
+  const router = useRouter()
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar
@@ -72,6 +75,7 @@ export default function Index() {
 
         <View style={styles.actionRow}>
           <Pressable
+            onPress={() => router.push('/register')}
             style={({ pressed }) => [
               styles.primaryButton,
               pressed && styles.buttonPressed,
@@ -80,6 +84,7 @@ export default function Index() {
             <Text style={styles.primaryButtonText}>Get started</Text>
           </Pressable>
           <Pressable
+            onPress={() => router.push('/login')}
             style={({ pressed }) => [
               styles.secondaryButton,
               pressed && styles.buttonPressed,
