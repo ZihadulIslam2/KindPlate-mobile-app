@@ -1,103 +1,139 @@
+import { useRouter } from 'expo-router'
+import { StatusBar } from 'expo-status-bar'
 import {
   Image,
   Pressable,
-  StatusBar,
+  ScrollView,
   StyleSheet,
   Text,
   View,
 } from 'react-native'
-import { useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-const features = [
+const quickActions = [
+  { label: 'Donate food', tone: 'green' as const },
+  { label: 'Find meals', tone: 'amber' as const },
+  { label: 'My requests', tone: 'blue' as const },
+]
+
+const nearbyItems = [
   {
-    title: 'Share surplus',
-    description: 'Turn extra food into meaningful support.',
+    name: 'Community kitchen',
+    detail: '18 meals ready • 1.2 km away',
   },
   {
-    title: 'Simple pickup',
-    description: 'Make donations and requests effortless.',
+    name: 'Fresh surplus pickup',
+    detail: '12 items available • Free pickup',
+  },
+  {
+    name: 'Daily pantry share',
+    detail: 'Open until 8:00 PM • Verified donor',
   },
 ]
 
-export default function Index() {
+export default function HomeScreen() {
   const router = useRouter()
+
+  const greeting = 'Good afternoon'
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar
-        barStyle="dark-content"
-        backgroundColor={styles.safeArea.backgroundColor}
-      />
-      <View style={styles.container}>
-        <View style={styles.decorTop} />
-        <View style={styles.decorBottom} />
+      <StatusBar style="light" />
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.heroBackdrop} />
+        <View style={styles.heroBackdropAccent} />
 
-        <View style={styles.brandRow}>
-          <View style={styles.brandPill}>
-            <Text style={styles.brandPillText}>KindPlate</Text>
+        <View style={styles.headerRow}>
+          <View>
+            <Text style={styles.greeting}>{greeting},</Text>
+            <Text style={styles.title}>Welcome to KindPlate</Text>
           </View>
-          <Text style={styles.brandTagline}>Food sharing with care</Text>
+
+          <View style={styles.profileChip}>
+            <Text style={styles.profileInitial}>K</Text>
+          </View>
         </View>
 
         <View style={styles.heroCard}>
-          <View style={styles.heroGlow} />
-          <View style={styles.logoCircle}>
-            <Image
-              source={require('../../assets/images/splash-icon.png')}
-              resizeMode="contain"
-              style={styles.logo}
-            />
+          <View style={styles.heroTextBlock}>
+            <Text style={styles.heroLabel}>Today’s impact</Text>
+            <Text style={styles.heroStat}>34 meals shared</Text>
+            <Text style={styles.heroDescription}>
+              Help reduce food waste by sharing surplus meals with people who
+              need them most.
+            </Text>
+          </View>
+
+          <View style={styles.heroIllustrationWrap}>
+            <View style={styles.heroGlow} />
+            <View style={styles.heroIllustrationCircle}>
+              <Image
+                source={require('../../assets/images/splash-icon.png')}
+                resizeMode="contain"
+                style={styles.heroIllustration}
+              />
+            </View>
           </View>
         </View>
 
-        <View style={styles.copyBlock}>
-          <Text style={styles.title}>Welcome to KindPlate</Text>
-          <Text style={styles.subtitle}>
-            A clean, community-first food sharing experience designed to make
-            every plate count.
-          </Text>
+        <View style={styles.actionGrid}>
+          {quickActions.map((item) => (
+            <Pressable
+              key={item.label}
+              style={({ pressed }) => [
+                styles.actionCard,
+                styles[`action${item.tone}`],
+                pressed && styles.pressed,
+              ]}
+              onPress={() => router.push('/register')}
+            >
+              <View style={[styles.actionDot, styles[`dot${item.tone}`]]} />
+              <Text style={styles.actionLabel}>{item.label}</Text>
+            </Pressable>
+          ))}
         </View>
 
-        <View style={styles.featureList}>
-          {features.map((feature) => (
-            <View key={feature.title} style={styles.featureCard}>
-              <View style={styles.featureDot} />
-              <View style={styles.featureTextGroup}>
-                <Text style={styles.featureTitle}>{feature.title}</Text>
-                <Text style={styles.featureDescription}>
-                  {feature.description}
-                </Text>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Nearby opportunities</Text>
+          <Text style={styles.sectionLink}>View all</Text>
+        </View>
+
+        <View style={styles.listWrap}>
+          {nearbyItems.map((item) => (
+            <View key={item.name} style={styles.listCard}>
+              <View style={styles.listIcon}>
+                <Text style={styles.listIconText}>•</Text>
+              </View>
+              <View style={styles.listCopy}>
+                <Text style={styles.listTitle}>{item.name}</Text>
+                <Text style={styles.listDetail}>{item.detail}</Text>
               </View>
             </View>
           ))}
         </View>
 
-        <View style={styles.actionRow}>
+        <View style={styles.featurePanel}>
+          <View style={styles.featureBadge}>
+            <Text style={styles.featureBadgeText}>Live</Text>
+          </View>
+          <Text style={styles.featurePanelTitle}>
+            Save meals before they go to waste
+          </Text>
+          <Text style={styles.featurePanelText}>
+            Connect with local donors, browse available food, and manage your
+            requests in one simple place.
+          </Text>
           <Pressable
+            style={styles.primaryButton}
             onPress={() => router.push('/register')}
-            style={({ pressed }) => [
-              styles.primaryButton,
-              pressed && styles.buttonPressed,
-            ]}
           >
-            <Text style={styles.primaryButtonText}>Get started</Text>
-          </Pressable>
-          <Pressable
-            onPress={() => router.push('/login')}
-            style={({ pressed }) => [
-              styles.secondaryButton,
-              pressed && styles.buttonPressed,
-            ]}
-          >
-            <Text style={styles.secondaryButtonText}>Explore</Text>
+            <Text style={styles.primaryButtonText}>Start sharing</Text>
           </Pressable>
         </View>
-
-        <Text style={styles.footerText}>
-          Together, we reduce waste and share better.
-        </Text>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   )
 }
@@ -105,187 +141,273 @@ export default function Index() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F8F6F1',
+    backgroundColor: '#101513',
   },
-  container: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 24,
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    overflow: 'hidden',
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 18,
+    paddingBottom: 28,
+    gap: 18,
+    position: 'relative',
   },
-  decorTop: {
+  heroBackdrop: {
     position: 'absolute',
-    top: -40,
-    right: -40,
-    width: 160,
-    height: 160,
-    borderRadius: 80,
-    backgroundColor: 'rgba(132, 201, 139, 0.16)',
+    top: -30,
+    right: -60,
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    backgroundColor: 'rgba(132, 201, 139, 0.13)',
   },
-  decorBottom: {
+  heroBackdropAccent: {
     position: 'absolute',
-    bottom: 28,
-    left: -50,
+    top: 120,
+    left: -40,
     width: 140,
     height: 140,
     borderRadius: 70,
-    backgroundColor: 'rgba(47, 133, 90, 0.08)',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
   },
-  brandRow: {
-    width: '100%',
+  headerRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginTop: 6,
+    justifyContent: 'space-between',
+    gap: 12,
   },
-  brandPill: {
-    backgroundColor: '#163B2D',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 999,
-  },
-  brandPillText: {
-    color: '#F9FBF7',
-    fontSize: 14,
-    fontWeight: '700',
-    letterSpacing: 0.8,
-  },
-  brandTagline: {
-    color: '#55615A',
+  greeting: {
+    color: '#AEB7B1',
     fontSize: 13,
-    letterSpacing: 0.5,
+    fontWeight: '600',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+  },
+  title: {
+    color: '#F7F8F6',
+    fontSize: 27,
+    lineHeight: 32,
+    fontWeight: '800',
+    letterSpacing: -0.4,
+  },
+  profileChip: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#1E2A23',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  profileInitial: {
+    color: '#F7F8F6',
+    fontSize: 18,
+    fontWeight: '800',
   },
   heroCard: {
-    width: '100%',
-    minHeight: 270,
+    backgroundColor: '#1A211E',
+    borderRadius: 28,
+    padding: 18,
+    minHeight: 220,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+  },
+  heroTextBlock: {
+    width: '56%',
+    gap: 8,
+  },
+  heroLabel: {
+    color: '#9DB69C',
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+  },
+  heroStat: {
+    color: '#FFFFFF',
+    fontSize: 24,
+    lineHeight: 30,
+    fontWeight: '800',
+  },
+  heroDescription: {
+    color: '#BBC3BC',
+    fontSize: 13,
+    lineHeight: 19,
+  },
+  heroIllustrationWrap: {
+    position: 'absolute',
+    right: -12,
+    top: 16,
+    width: 190,
+    height: 190,
     alignItems: 'center',
     justifyContent: 'center',
   },
   heroGlow: {
     position: 'absolute',
-    width: 220,
-    height: 220,
-    borderRadius: 110,
-    backgroundColor: 'rgba(255, 255, 255, 0.75)',
-    shadowColor: '#1F2937',
-    shadowOpacity: 0.08,
-    shadowRadius: 30,
-    shadowOffset: { width: 0, height: 16 },
-    elevation: 6,
-  },
-  logoCircle: {
-    width: 210,
-    height: 210,
-    borderRadius: 105,
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#111827',
-    shadowOpacity: 0.12,
-    shadowRadius: 22,
-    shadowOffset: { width: 0, height: 12 },
-    elevation: 10,
-  },
-  logo: {
     width: 170,
     height: 170,
+    borderRadius: 85,
+    backgroundColor: 'rgba(132, 201, 139, 0.12)',
   },
-  copyBlock: {
+  heroIllustrationCircle: {
+    width: 160,
+    height: 160,
+    borderRadius: 80,
+    backgroundColor: '#F5F6F2',
     alignItems: 'center',
-    gap: 10,
-    paddingHorizontal: 6,
+    justifyContent: 'center',
   },
-  title: {
-    color: '#133024',
-    fontSize: 30,
-    lineHeight: 36,
-    fontWeight: '800',
-    textAlign: 'center',
-    letterSpacing: -0.5,
+  heroIllustration: {
+    width: 128,
+    height: 128,
   },
-  subtitle: {
-    color: '#5F6A64',
-    fontSize: 15,
-    lineHeight: 22,
-    textAlign: 'center',
-  },
-  featureList: {
-    width: '100%',
-    gap: 12,
-  },
-  featureCard: {
+  actionGrid: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
     gap: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderWidth: 1,
-    borderColor: 'rgba(20, 48, 36, 0.06)',
   },
-  featureDot: {
+  actionCard: {
+    flex: 1,
+    borderRadius: 20,
+    padding: 14,
+    gap: 10,
+    minHeight: 92,
+    borderWidth: 1,
+  },
+  actiongreen: {
+    backgroundColor: '#16211B',
+    borderColor: 'rgba(148, 201, 139, 0.18)',
+  },
+  actionamber: {
+    backgroundColor: '#1F1B16',
+    borderColor: 'rgba(220, 170, 103, 0.16)',
+  },
+  actionblue: {
+    backgroundColor: '#171E22',
+    borderColor: 'rgba(125, 176, 214, 0.16)',
+  },
+  actionDot: {
     width: 12,
     height: 12,
-    marginTop: 5,
     borderRadius: 6,
+  },
+  dotgreen: {
     backgroundColor: '#84C98B',
   },
-  featureTextGroup: {
+  dotamber: {
+    backgroundColor: '#DFA45A',
+  },
+  dotblue: {
+    backgroundColor: '#79AEDD',
+  },
+  actionLabel: {
+    color: '#F8FAF7',
+    fontSize: 13,
+    fontWeight: '700',
+    lineHeight: 18,
+  },
+  pressed: {
+    opacity: 0.92,
+    transform: [{ scale: 0.99 }],
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  sectionTitle: {
+    color: '#F7F8F6',
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  sectionLink: {
+    color: '#9DB69C',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  listWrap: {
+    gap: 12,
+  },
+  listCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: '#171C1A',
+    borderRadius: 20,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+  },
+  listIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(132, 201, 139, 0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  listIconText: {
+    color: '#84C98B',
+    fontSize: 24,
+    lineHeight: 24,
+    fontWeight: '800',
+  },
+  listCopy: {
     flex: 1,
     gap: 4,
   },
-  featureTitle: {
-    color: '#163B2D',
+  listTitle: {
+    color: '#F5F7F4',
     fontSize: 15,
     fontWeight: '700',
   },
-  featureDescription: {
-    color: '#66716B',
+  listDetail: {
+    color: '#AEB7B1',
     fontSize: 13,
     lineHeight: 18,
   },
-  actionRow: {
-    width: '100%',
-    flexDirection: 'row',
-    gap: 12,
+  featurePanel: {
+    backgroundColor: '#EAF3EA',
+    borderRadius: 26,
+    padding: 18,
+    gap: 10,
+  },
+  featureBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#163B2D',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 999,
+  },
+  featureBadgeText: {
+    color: '#F5F7F4',
+    fontSize: 11,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+  },
+  featurePanelTitle: {
+    color: '#133024',
+    fontSize: 20,
+    lineHeight: 26,
+    fontWeight: '800',
+  },
+  featurePanelText: {
+    color: '#51615B',
+    fontSize: 13,
+    lineHeight: 19,
   },
   primaryButton: {
-    flex: 1,
     backgroundColor: '#163B2D',
     borderRadius: 18,
-    paddingVertical: 16,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  secondaryButton: {
-    flex: 1,
-    backgroundColor: 'rgba(22, 59, 45, 0.08)',
-    borderRadius: 18,
-    paddingVertical: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
+    minHeight: 52,
+    marginTop: 4,
   },
   primaryButtonText: {
     color: '#FFFFFF',
     fontSize: 15,
-    fontWeight: '700',
-  },
-  secondaryButtonText: {
-    color: '#163B2D',
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  buttonPressed: {
-    opacity: 0.88,
-    transform: [{ scale: 0.99 }],
-  },
-  footerText: {
-    color: '#7A847E',
-    fontSize: 12,
-    textAlign: 'center',
-    marginTop: -4,
+    fontWeight: '800',
   },
 })
