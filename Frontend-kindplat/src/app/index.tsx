@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import {
+  Alert,
   Image,
   Pressable,
   ScrollView,
@@ -18,16 +19,31 @@ const quickActions = [
 
 const nearbyItems = [
   {
-    name: 'Community kitchen',
-    detail: '18 meals ready • 1.2 km away',
+    id: 'item-1',
+    title: 'Vegetable biryani meal box',
+    description: 'Freshly cooked, serves 2 people, packed 30 mins ago.',
+    foodType: 'Cooked meal',
+    distanceKm: 1.2,
+    imageUrl:
+      'https://images.unsplash.com/photo-1701579231340-3a5ce9106ec9?auto=format&fit=crop&w=900&q=80',
   },
   {
-    name: 'Fresh surplus pickup',
-    detail: '12 items available • Free pickup',
+    id: 'item-2',
+    title: 'Bakery bread and buns pack',
+    description: 'Same-day baked items, sealed and ready for pickup.',
+    foodType: 'Bakery',
+    distanceKm: 2.4,
+    imageUrl:
+      'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=900&q=80',
   },
   {
-    name: 'Daily pantry share',
-    detail: 'Open until 8:00 PM • Verified donor',
+    id: 'item-3',
+    title: 'Seasonal fruit basket',
+    description: 'Mixed ripe fruits. Best for family sharing tonight.',
+    foodType: 'Fruits',
+    distanceKm: 0.9,
+    imageUrl:
+      'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?auto=format&fit=crop&w=900&q=80',
   },
 ]
 
@@ -103,13 +119,33 @@ export default function HomeScreen() {
 
         <View style={styles.listWrap}>
           {nearbyItems.map((item) => (
-            <View key={item.name} style={styles.listCard}>
-              <View style={styles.listIcon}>
-                <Text style={styles.listIconText}>•</Text>
-              </View>
-              <View style={styles.listCopy}>
-                <Text style={styles.listTitle}>{item.name}</Text>
-                <Text style={styles.listDetail}>{item.detail}</Text>
+            <View key={item.id} style={styles.foodCard}>
+              <Image source={{ uri: item.imageUrl }} style={styles.foodImage} />
+
+              <View style={styles.foodCardBody}>
+                <View style={styles.foodCardTopRow}>
+                  <Text style={styles.foodTypeTag}>{item.foodType}</Text>
+                  <View style={styles.distancePill}>
+                    <Text style={styles.distanceText}>
+                      📍 {item.distanceKm} km
+                    </Text>
+                  </View>
+                </View>
+
+                <Text style={styles.foodTitle}>{item.title}</Text>
+                <Text style={styles.foodDescription}>{item.description}</Text>
+
+                <Pressable
+                  style={({ pressed }) => [
+                    styles.reserveButton,
+                    pressed && styles.pressed,
+                  ]}
+                  onPress={() =>
+                    Alert.alert('Reserved', `${item.title} reserved.`)
+                  }
+                >
+                  <Text style={styles.reserveButtonText}>Reserve now</Text>
+                </Pressable>
               </View>
             </View>
           ))}
@@ -328,43 +364,69 @@ const styles = StyleSheet.create({
   listWrap: {
     gap: 12,
   },
-  listCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
+  foodCard: {
     backgroundColor: '#171C1A',
     borderRadius: 20,
-    padding: 14,
+    overflow: 'hidden',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.06)',
   },
-  listIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(132, 201, 139, 0.12)',
+  foodImage: {
+    width: '100%',
+    height: 140,
+  },
+  foodCardBody: {
+    padding: 14,
+    gap: 10,
+  },
+  foodCardTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    justifyContent: 'center',
+    gap: 10,
   },
-  listIconText: {
-    color: '#84C98B',
-    fontSize: 24,
-    lineHeight: 24,
+  foodTypeTag: {
+    color: '#163B2D',
+    backgroundColor: '#DDF1E1',
+    fontSize: 12,
     fontWeight: '800',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 999,
   },
-  listCopy: {
-    flex: 1,
-    gap: 4,
+  distancePill: {
+    backgroundColor: 'rgba(132, 201, 139, 0.12)',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 999,
   },
-  listTitle: {
+  distanceText: {
+    color: '#9DB69C',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  foodTitle: {
     color: '#F5F7F4',
     fontSize: 15,
     fontWeight: '700',
   },
-  listDetail: {
+  foodDescription: {
     color: '#AEB7B1',
     fontSize: 13,
     lineHeight: 18,
+  },
+  reserveButton: {
+    marginTop: 2,
+    alignSelf: 'flex-start',
+    backgroundColor: '#163B2D',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  reserveButtonText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '800',
   },
   featurePanel: {
     backgroundColor: '#EAF3EA',
