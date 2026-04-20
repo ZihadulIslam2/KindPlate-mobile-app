@@ -1,6 +1,8 @@
+import { useEffect, useState } from 'react'
 import { useRouter } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import {
+  ActivityIndicator,
   Alert,
   Image,
   Pressable,
@@ -10,6 +12,7 @@ import {
   View,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { fetchNearbyFoods, type FoodPostItem } from '../lib/food'
 
 const quickActions = [
   { label: 'Donate food', tone: 'green' as const },
@@ -17,40 +20,109 @@ const quickActions = [
   { label: 'My requests', tone: 'blue' as const },
 ]
 
-const nearbyItems = [
-  {
-    id: 'item-1',
-    title: 'Vegetable biryani meal box',
-    description: 'Freshly cooked, serves 2 people, packed 30 mins ago.',
-    foodType: 'Cooked meal',
-    distanceKm: 1.2,
-    imageUrl:
-      'https://images.unsplash.com/photo-1701579231340-3a5ce9106ec9?auto=format&fit=crop&w=900&q=80',
-  },
-  {
-    id: 'item-2',
-    title: 'Bakery bread and buns pack',
-    description: 'Same-day baked items, sealed and ready for pickup.',
-    foodType: 'Bakery',
-    distanceKm: 2.4,
-    imageUrl:
-      'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=900&q=80',
-  },
-  {
-    id: 'item-3',
-    title: 'Seasonal fruit basket',
-    description: 'Mixed ripe fruits. Best for family sharing tonight.',
-    foodType: 'Fruits',
-    distanceKm: 0.9,
-    imageUrl:
-      'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?auto=format&fit=crop&w=900&q=80',
-  },
-]
-
 export default function HomeScreen() {
   const router = useRouter()
+  const [nearbyItems, setNearbyItems] = useState<FoodPostItem[]>([])
+  const [loadingNearby, setLoadingNearby] = useState(true)
+  const [nearbyError, setNearbyError] = useState('')
 
   const greeting = 'Good afternoon'
+
+  useEffect(() => {
+    let mounted = true
+
+    const loadNearbyFoods = async () => {
+      try {
+        setLoadingNearby(true)
+        setNearbyError('')
+
+        const data = await fetchNearbyFoods()
+
+        if (mounted) {
+          setNearbyItems(data)
+        }
+      } catch (error) {
+        if (mounted) {
+          setNearbyError(
+            error instanceof Error
+              ? error.message
+              : 'Failed to load nearby food posts',
+          )
+        }
+      } finally {
+        if (mounted) {
+          setLoadingNearby(false)
+        }
+      }
+    }
+
+    loadNearbyFoods()
+
+    return () => {
+      mounted = false
+    }
+  }, [])
+
+  let nearbyContent
+
+  if (loadingNearby) {
+    nearbyContent = (
+      <View style={styles.loadingWrap}>
+        <ActivityIndicator color="#84C98B" />
+        <Text style={styles.loadingText}>Loading nearby food posts...</Text>
+      </View>
+    )
+  } else if (nearbyError) {
+    nearbyContent = (
+      <View style={styles.errorWrap}>
+        <Text style={styles.errorCardText}>{nearbyError}</Text>
+      </View>
+    )
+  } else if (nearbyItems.length === 0) {
+    nearbyContent = (
+      <View style={styles.emptyWrap}>
+        <Text style={styles.emptyText}>
+          No shared food yet. Be the first to share with community.
+        </Text>
+      </View>
+    )
+  } else {
+    nearbyContent = nearbyItems.map((item) => (
+      <View key={item.id} style={styles.foodCard}>
+        <Image
+          source={
+            item.imageUrl
+              ? { uri: item.imageUrl }
+              : require('../../assets/logo.png')
+          }
+          style={styles.foodImage}
+        />
+
+        <View style={styles.foodCardBody}>
+          <View style={styles.foodCardTopRow}>
+            <Text style={styles.foodTypeTag}>{item.foodType}</Text>
+            <View style={styles.distancePill}>
+              <Text style={styles.distanceText}>
+                📍 {Number(item.distanceKm ?? 0).toFixed(1)} km
+              </Text>
+            </View>
+          </View>
+
+          <Text style={styles.foodTitle}>{item.plateTitle}</Text>
+          <Text style={styles.foodDescription}>
+            {[item.address, item.quantity, item.weight].filter(Boolean).join(' • ')}
+          </Text>
+
+          <Pressable
+            style={({ pressed }) => [styles.reserveButton, pressed && styles.pressed]}
+            onPress={() => Alert.alert('Reserved', `${item.plateTitle} reserved.`)}
+          >
+            <Text style={styles.reserveButtonText}>Reserve now</Text>
+          </Pressable>
+        </View>
+      </View>
+    ))
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -114,42 +186,12 @@ export default function HomeScreen() {
 
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Nearby opportunities</Text>
-          <Text style={styles.sectionLink}>View all</Text>
+          <Pressable onPress={() => router.push('./post-food')}>
+            <Text style={styles.sectionLink}>Share food</Text>
+          </Pressable>
         </View>
 
-        <View style={styles.listWrap}>
-          {nearbyItems.map((item) => (
-            <View key={item.id} style={styles.foodCard}>
-              <Image source={{ uri: item.imageUrl }} style={styles.foodImage} />
-
-              <View style={styles.foodCardBody}>
-                <View style={styles.foodCardTopRow}>
-                  <Text style={styles.foodTypeTag}>{item.foodType}</Text>
-                  <View style={styles.distancePill}>
-                    <Text style={styles.distanceText}>
-                      📍 {item.distanceKm} km
-                    </Text>
-                  </View>
-                </View>
-
-                <Text style={styles.foodTitle}>{item.title}</Text>
-                <Text style={styles.foodDescription}>{item.description}</Text>
-
-                <Pressable
-                  style={({ pressed }) => [
-                    styles.reserveButton,
-                    pressed && styles.pressed,
-                  ]}
-                  onPress={() =>
-                    Alert.alert('Reserved', `${item.title} reserved.`)
-                  }
-                >
-                  <Text style={styles.reserveButtonText}>Reserve now</Text>
-                </Pressable>
-              </View>
-            </View>
-          ))}
-        </View>
+        <View style={styles.listWrap}>{nearbyContent}</View>
 
         <View style={styles.featurePanel}>
           <View style={styles.featureBadge}>
@@ -164,7 +206,7 @@ export default function HomeScreen() {
           </Text>
           <Pressable
             style={styles.primaryButton}
-            onPress={() => router.push('/register')}
+            onPress={() => router.push('/onboarding')}
           >
             <Text style={styles.primaryButtonText}>Start sharing</Text>
           </Pressable>
@@ -363,6 +405,44 @@ const styles = StyleSheet.create({
   },
   listWrap: {
     gap: 12,
+  },
+  loadingWrap: {
+    backgroundColor: '#171C1A',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+    padding: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+  },
+  loadingText: {
+    color: '#AEB7B1',
+    fontSize: 13,
+  },
+  errorWrap: {
+    backgroundColor: '#2A1514',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(180, 35, 24, 0.38)',
+    padding: 16,
+  },
+  errorCardText: {
+    color: '#FECACA',
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  emptyWrap: {
+    backgroundColor: '#171C1A',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+    padding: 16,
+  },
+  emptyText: {
+    color: '#AEB7B1',
+    fontSize: 13,
+    lineHeight: 18,
   },
   foodCard: {
     backgroundColor: '#171C1A',

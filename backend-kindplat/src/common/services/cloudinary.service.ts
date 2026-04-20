@@ -5,10 +5,20 @@ import config from '../config/app.config';
 @Injectable()
 export class CloudinaryService {
   constructor() {
+    if (
+      !config.cloudinary_cloud_name ||
+      !config.cloudinary_api_key ||
+      !config.cloudinary_api_secret
+    ) {
+      throw new Error(
+        'Cloudinary configuration is missing. Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET in .env',
+      );
+    }
+
     cloudinary.config({
-      cloud_name: config.cloudinary_cloud_name,
-      api_key: config.cloudinary_api_key,
-      api_secret: config.cloudinary_api_secret,
+      cloud_name: config.cloudinary_cloud_name.trim(),
+      api_key: config.cloudinary_api_key.trim(),
+      api_secret: config.cloudinary_api_secret.trim(),
     });
   }
 
@@ -24,7 +34,10 @@ export class CloudinaryService {
         },
         (error, uploaded) => {
           if (error) {
-            reject(new Error('Cloudinary upload failed'));
+            const cloudinaryMessage =
+              (error as { message?: string }).message ||
+              'Unknown Cloudinary error';
+            reject(new Error(`Cloudinary upload failed: ${cloudinaryMessage}`));
             return;
           }
           if (!uploaded) {

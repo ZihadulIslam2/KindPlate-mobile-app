@@ -11,6 +11,7 @@ import { MetricsModule } from './metrics/metrics.module';
 import { WinstonModule } from 'nest-winston';
 import { winstonConfig } from './common/config/winston.config';
 import { LoggerModule } from './common/modules/logger.module';
+import { FoodModule } from './food/food.module';
 
 const isRateLimitEnabled = process.env.NODE_ENV !== 'development';
 
@@ -36,6 +37,7 @@ const isRateLimitEnabled = process.env.NODE_ENV !== 'development';
     // BlogModule,
     AuthModule,
     UserModule,
+    FoodModule,
   ],
   controllers: [AppController],
   providers: [AppService],
