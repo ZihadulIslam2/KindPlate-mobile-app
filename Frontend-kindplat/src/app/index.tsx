@@ -71,7 +71,7 @@ export default function HomeScreen() {
             <View style={styles.heroGlow} />
             <View style={styles.heroIllustrationCircle}>
               <Image
-                source={require('../../assets/images/splash-icon.png')}
+                source={require('../../assets/logo.png')}
                 resizeMode="contain"
                 style={styles.heroIllustration}
               />

@@ -49,7 +49,7 @@ export function AuthScreen({
           <View style={styles.header}>
             <View style={styles.brandBadge}>
               <Image
-                source={require('../../assets/images/splash-icon.png')}
+                source={require('../../assets/logo.png')}
                 style={styles.brandLogo}
                 resizeMode="contain"
               />
