@@ -19,6 +19,10 @@ type ApiEnvelope<T> = {
   data?: T
 }
 
+type NestedAuthResponse<T> = ApiEnvelope<T | ApiEnvelope<T>> & {
+  success?: boolean
+}
+
 const DEFAULT_BASE_URL =
   process.env.EXPO_PUBLIC_API_URL ??
   (Platform.OS === 'android' ? 'http://10.0.2.2:5000' : 'http://localhost:5000')
@@ -35,13 +39,24 @@ async function requestAuth<T>(
     body: JSON.stringify(body),
   })
 
-  const payload = (await response.json()) as ApiEnvelope<T>
+  const payload = (await response.json()) as NestedAuthResponse<T>
 
   if (!response.ok) {
     throw new Error(payload.message ?? 'Authentication request failed')
   }
 
-  return (payload.data ?? payload) as T
+  const normalizedData = payload.data
+
+  if (
+    normalizedData &&
+    typeof normalizedData === 'object' &&
+    'data' in normalizedData &&
+    normalizedData.data
+  ) {
+    return normalizedData.data as T
+  }
+
+  return (normalizedData ?? payload) as T
 }
 
 export function login(email: string, password: string) {
